@@ -69,15 +69,16 @@ inscriptions.each do |inscription|
   for i in name_pairs
     new_email = name_replacement(new_email, i[0], inscription, i[1])
   end
-  if inscription["Inscrever-se nas atividades de sábado?"]
+  if inscription["Inscrever-se nas atividades de sábado?"] == 'SIM'
     fee = "s"
     for i in saturyday_activitiy_pairs
       new_email = activity_replacement(new_email, i[0], inscription, i[1])[0]
     end
   end
-  if inscription["Inscrever-se nas atividades durante a semana?"]
+  if inscription["Inscrever-se nas atividades durante a semana?"] == 'SIM'
+    nbr = 0
     for i in week_activity_pairs
-      new_email_and_nbr = activity_replacement(new_email, i[0], inscription, i[1])
+      new_email_and_nbr = activity_replacement(new_email, i[0], inscription, i[1], nbr)
       new_email = new_email_and_nbr[0]
       nbr = new_email_and_nbr[1]
     end

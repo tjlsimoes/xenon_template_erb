@@ -94,6 +94,12 @@ inscriptions.each do |inscription|
     new_email = empty_days_replacement(new_email, i)
   end
   fee = fee_calc(fee)
+  if inscription['Quer ajudar?'].include?('50%')
+    fee += 25
+  elsif inscription['Quer ajudar?'].include?('100%')
+    fee += 50                                         # Is it 50 or 45?
+  end
+
   annual_fee = (fee * 10 * 0.9).to_s
   new_email.gsub!('MONTHLY', fee.to_s)
   new_email.gsub!('ANNUAL', annual_fee)

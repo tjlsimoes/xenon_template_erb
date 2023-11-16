@@ -12,7 +12,7 @@ end
 
 def activity_replacement(new_email, name, inscription, inscriptions_name, nbr = 0)
   name_to_be = inscription["#{inscriptions_name}"]
-  if name_to_be && !(name_to_be.include?('nenhuma'))
+  if name_to_be && !(name_to_be.include?('nenhuma')) && !(name_to_be.empty?)
     nbr += 1
     new_email.gsub!(name, name_to_be)
   end
@@ -47,18 +47,23 @@ def fee_calc(fee)
 end
 
 
-inscriptions = CSV.open('/home/tjlsimoes/Downloads/Xénon/24.csv',
+inscriptions = CSV.open('/home/tjlsimoes/Downloads/Xénon/24_header_change.csv',
                         headers: true)
 name_pairs = [['SONS_NAME', 'NOME DO PARTICIPANTE'], ['MOTHERS_NAME', 'NOME DA MÃE'],
         ['FATHERS_NAME', 'NOME DO PAI']]
-saturday_activitiy_pairs = [['SATURDAY_1', 'Sábado atividade 1 [1º tempo [15h00/16h00]]'],
-                    ['SATURDAY_2', 'Sábado atividade 2 [2º tempo [16h00/17h00]]'],
+saturday_activitiy_pairs = [['SATURDAY_1', 'Sábado atividade 1 [1º tempo [15h00/16h00]]a'],
+                    ['SATURDAY_1', 'Sábado atividade 1 [1º tempo [15h00/16h00]]b'],
+                    ['SATURDAY_2', 'Sábado atividade 2 [2º tempo [16h00/17h00]]a'],
+                    ['SATURDAY_2', 'Sábado atividade 2 [2º tempo [16h00/17h00]]b'],
                     ['SATURDAY_3', 'Sábado atividade 3 [4º tempo [18h00/19h00]]'],
                     ['SATURDAY_3', 'Sábado atividade 3 [3º tempo [17h00/18h00]]']]
-week_activity_pairs = [['MONDAY', 'Segunda-feira [2.ª feira]'],
-                    ['TUESDAY', 'Terça-feira [3.ª feira]'],
+week_activity_pairs = [['MONDAY', 'Segunda-feira [2.ª feira]a'],
+                    ['MONDAY', 'Segunda-feira [2.ª feira]b'],
+                    ['TUESDAY', 'Terça-feira [3.ª feira]a'],
+                    ['TUESDAY', 'Terça-feira [3.ª feira]b'],
                     ['WEDNESDAY', 'Quarta-feira [4.ª feira]'],
-                    ['THURSDAY', 'Quinta-feira [5.ª feira]']]
+                    ['THURSDAY', 'Quinta-feira [5.ª feira]a'],
+                    ['THURSDAY', 'Quinta-feira [5.ª feira]b']]
 days = ['SATURDAY_1', 'SATURDAY_2', 'SATURDAY_3','MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY']
 
 inscriptions.each do |inscription|
@@ -68,13 +73,15 @@ inscriptions.each do |inscription|
   for i in name_pairs
     new_email = name_replacement(new_email, i[0], inscription, i[1])
   end
-  if inscription['Inscrever-se nas atividades de sábado?']
+  if inscription['Inscrever-se nas atividades de sábado?a'] ||
+        inscription['Inscrever-se nas atividades de sábado?b']
     fee = 's'
     for i in saturday_activitiy_pairs
       new_email = activity_replacement(new_email, i[0], inscription, i[1])[0]
     end
   end
-  if inscription['Inscrever-se nas atividades durante a semana?']
+  if inscription['Inscrever-se nas atividades durante a semana?a'] ||
+      inscription['Inscrever-se nas atividades durante a semana?b']
     nbr = 0
     for i in week_activity_pairs
       new_email_and_nbr = activity_replacement(new_email, i[0], inscription, i[1], nbr)

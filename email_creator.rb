@@ -26,7 +26,7 @@ end
 
 def fee_calc(fee)
   case fee
-  when 'n'
+  when 'n0'
     fee = 5
   when 'n1'
     fee = 30
@@ -73,23 +73,23 @@ inscriptions.each do |inscription|
   for i in name_pairs
     new_email = name_replacement(new_email, i[0], inscription, i[1])
   end
-  if inscription['Inscrever-se nas atividades de sábado?a'] ||
-        inscription['Inscrever-se nas atividades de sábado?b']
+  if inscription['Inscrever-se nas atividades de sábado?a'] == 'Sim' ||
+        inscription['Inscrever-se nas atividades de sábado?b'] == 'Sim'
     fee = 's'
     for i in saturday_activitiy_pairs
       new_email = activity_replacement(new_email, i[0], inscription, i[1])[0]
     end
   end
-  if inscription['Inscrever-se nas atividades durante a semana?a'] ||
-      inscription['Inscrever-se nas atividades durante a semana?b']
-    nbr = 0
+  nbr = 0
+  if inscription['Inscrever-se nas atividades durante a semana?a'] == 'Sim' ||
+      inscription['Inscrever-se nas atividades durante a semana?b'] == 'Sim'
     for i in week_activity_pairs
       new_email_and_nbr = activity_replacement(new_email, i[0], inscription, i[1], nbr)
       new_email = new_email_and_nbr[0]
       nbr = new_email_and_nbr[1]
     end
-    fee = fee + nbr.to_s
   end
+  fee = fee + nbr.to_s
   for i in days
     new_email = empty_days_replacement(new_email, i)
   end

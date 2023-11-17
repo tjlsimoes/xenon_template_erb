@@ -69,20 +69,24 @@ for i in hashes_array
   end
   fee = fee + nbr.to_s
 
+  # Removal of addition of financial aid to singular inscription quota's
+  # calculation.
+  # It would tamper with brothers' joint fee calculation.
+
   fee = fee_calc(fee)
-  if i['Quer ajudar?'].include?('50%')
-    fee += 25
-  elsif i['Quer ajudar?'].include?('100%')
-    fee += 50                                         # Is it 50 or 45?
-  end
+  # if i['Quer ajudar?'].include?('50%')
+  #   fee += 25
+  # elsif i['Quer ajudar?'].include?('100%')
+  #   fee += 50                                         # Is it 50 or 45?
+  # end
 
   i['QUOTA'] = fee.to_s
 end
 
-hashes_array.each do |hash|
-  p hash['NOME DO PARTICIPANTE']
-  p hash['QUOTA']
-end
+# hashes_array.each do |hash|
+#   p hash['NOME DO PARTICIPANTE']
+#   p hash['QUOTA']
+# end
 
 CSV.open("/home/tjlsimoes/Downloads/Xénon/24_header_change_e.csv", "w") do |csv|
   csv << hashes_array.first.keys # adds the attributes name on the first line

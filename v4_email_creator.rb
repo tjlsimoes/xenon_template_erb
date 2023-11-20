@@ -125,6 +125,165 @@ def quota_calc_csv(new_headers_csv_loc)
       csv << inscription_hash.values
     end
   end
+  return "/home/tjlsimoes/Downloads/Xénon_II/inscriptions_sing_quota.csv"
 end
 
-quota_calc_csv(new_headers_csv)
+
+# Generate a new CSV with the calculation of the
+# quota taking brothers into account.
+#
+# The idea was:
+# - From the CSV file with the singular quotas
+#    create an array of inscriptions' hashes.
+# - Add BROTHERS_QUOTA key to each hash and fill
+#    accordingly (default == nil).
+# - Create a new CSV file with the new BROTHERS_QUOTA
+#    column, so to speak.
+
+def create_brothers_quota_column(inscriptions)
+  hashes_array = []
+  inscriptions.each do |inscription|
+    hashes_array << inscription.to_h
+  end
+  hashes_array.each do |hash|
+    hash['BROTHERS_QUOTA'] = nil
+  end
+  return hashes_array
+end
+
+def brothers?(inscription_a, inscription_b)
+  inscription_a['CÓDIGO POSTAL'].split[0] == inscription_b['CÓDIGO POSTAL'].split[0] &&
+    inscription_a['NOME DO PARTICIPANTE'].split[-1] == inscription_b['NOME DO PARTICIPANTE'].split[-1]
+end
+
+def brothers_array(inscription, idx, inscriptions_hashes, inscriptions_hashes_length)
+  brothers = []
+  brothers << inscription
+  j = idx + 1
+  while j < inscriptions_hashes_length
+    if  brothers?(inscriptions_hashes[idx], inscriptions_hashes[j])
+      brothers << inscriptions_hashes[j]
+    end
+    j += 1
+  end
+  return brothers
+end
+
+def two_brothers_quota_calc(quota_1, quota_2)
+  if quota_1 == quota_2
+    case quota_1
+    when '45'
+      quota = 72
+    when '55'
+      quota = 88
+    when '65'
+      quota = 104
+    when '75'
+      quota = 120
+    when '30'
+      quota = 48
+    when '40'
+      quota = 64
+    when '50'
+      quota = 80
+    when '5'
+      quota = 10
+    end
+  else
+    quota = (quota_1.to_i + quota_2.to_i) * 0.8
+  end
+  return quota
+end
+
+def three_brothers_quota_calc(quota_1, quota_2, quota_3)
+  if quota_1 == quota_2 && quota_2 == quota_3
+    case quota_1
+    when '45'
+      quota = 94
+    when '55'
+      quota = 115
+    when '65'
+      quota = 136
+    when '75'
+      quota = 158
+    when '30'
+      quota = 63
+    when '40'
+      quota = 84
+    when '50'
+      quota = 105
+    when '5'
+      quota = 15
+    end
+  else
+    quota = (quota_1.to_i + quota_2.to_i + quota_3.to_i) * 0.7
+  end
+  return quota
+end
+
+def brothers_quota_calc(brothers)
+  if brothers.length == 2
+    quota = two_brothers_quota_calc(brothers[0]['QUOTA'], brothers[1]['QUOTA'])
+  elsif brothers.length == 3
+    quota = three_brothers_quota_calc(brothers[0]['QUOTA'], brothers[1]['QUOTA'], brothers[2]['QUOTA'])
+  end
+  return quota
+end
+
+def financial_aid_add(brothers, quota)
+  for i in brothers
+    if !i['Quer ajudar?'].nil? && i['Quer ajudar?'].include?('50%')
+      quota += 25
+    elsif !i['Quer ajudar?'].nil? && i['Quer ajudar?'].include?('100%')
+      quota += 45                                         # Is it 50 or 45?
+    end
+  end
+  return quota
+end
+
+def update_brothers_quota(brothers, quota)
+  i = 0
+  while i < brothers.length
+    if i == 0
+      brothers[i]['BROTHERS_QUOTA'] = quota.to_s
+    else
+      brothers[i]['BROTHERS_QUOTA'] = '-'
+    end
+    i += 1
+  end
+end
+
+def brothers_quota_calc_csv(quota_calc_csv_loc)
+  inscriptions = CSV.read(quota_calc_csv_loc, headers: true)
+  inscriptions_hashes = create_brothers_quota_column(inscriptions)
+
+  inscriptions_hashes_length = inscriptions_hashes.length
+
+  i = 0
+  while i < inscriptions_hashes_length
+    if inscriptions_hashes[i]['BROTHERS_QUOTA'].nil?
+      brothers = brothers_array(inscriptions_hashes[i], i, inscriptions_hashes, inscriptions_hashes_length)
+
+      if brothers.length > 1
+        joint_quota = brothers_quota_calc(brothers)
+        joint_quota = financial_aid_add(brothers, joint_quota)
+      else
+        joint_quota = financial_aid_add(brothers, brothers[0]['QUOTA'].to_i)  # Joint so to speak. Here it deals
+                                                                              # with no-brothers' case.
+      end
+      update_brothers_quota(brothers, joint_quota.round)
+    end
+    i += 1
+  end
+
+  CSV.open("/home/tjlsimoes/Downloads/Xénon_II/inscriptions_brothers_quotas.csv", "w") do |csv|
+    csv << inscriptions_hashes.first.keys
+    inscriptions_hashes.each do |inscription_hash|
+      csv << inscription_hash.values
+    end
+  end
+end
+
+
+sing_quota_loc = quota_calc_csv(new_headers_csv)
+brothers_quota_loc = brothers_quota_calc_csv(sing_quota_loc)

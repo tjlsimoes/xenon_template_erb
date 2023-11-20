@@ -10,7 +10,8 @@ $week_activity_pairs = [['MONDAY', 'Segunda-feira [2.ª feira]a'],
 
 # Generate a new CSV file with differentiated headers
 # for the saturday and week activities of younger and
-# older kids.
+# older kids. Rename financial aid field header to:
+# 'Quer ajudar?'
 
 def new_headers_csv
   original = CSV.read('/home/tjlsimoes/Downloads/Xénon_II/Inscriptions.csv')
@@ -25,7 +26,7 @@ def new_headers_csv
     end
     i += 1
   end
-
+  copy[0][37] = 'Quer ajudar?'
   CSV.open("/home/tjlsimoes/Downloads/Xénon_II/inscriptions_new_headers.csv", "w") do |csv|
     copy.each do |row|
       csv << row

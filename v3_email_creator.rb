@@ -207,8 +207,10 @@ while i < new_hashes_length
     brothers << new_hashes_array[i]
     j = i + 1
     while j < new_hashes_length
-      if new_hashes_array[i]['CÓDIGO POSTAL'].split[0] ==
-          new_hashes_array[j]['CÓDIGO POSTAL'].split[0]
+      if (new_hashes_array[i]['CÓDIGO POSTAL'].split[0] ==
+          new_hashes_array[j]['CÓDIGO POSTAL'].split[0]) &&
+          (new_hashes_array[i]['NOME DO PARTICIPANTE'].split[-1] ==
+          new_hashes_array[j]['NOME DO PARTICIPANTE'].split[-1])
         brothers << new_hashes_array[j]
       end
       j += 1
@@ -222,7 +224,7 @@ while i < new_hashes_length
       joint_fee = financial_aid?(brothers, brothers[0]['QUOTA'].to_i)  # Joint so to speak. Here it deals with no-brothers'
                                                                   # case.
     end
-    update_brothers_quota(brothers, joint_fee)
+    update_brothers_quota(brothers, joint_fee.round)
   end
   i += 1
 end
